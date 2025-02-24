@@ -2,3 +2,6 @@
 **.DS_Store
 /notebooks/None
 notebooks/.env
+notebooks/refresh_token.txt
+/notebooks/token files
+notebooks/client_secret.json
