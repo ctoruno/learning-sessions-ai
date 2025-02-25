@@ -5,3 +5,7 @@ notebooks/.env
 notebooks/refresh_token.txt
 /notebooks/token files
 notebooks/client_secret.json
+client_secret.json
+.streamlit/secrets.toml
+.env
+/notebooks/token_files
