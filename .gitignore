@@ -9,3 +9,6 @@ client_secret.json
 .streamlit/secrets.toml
 .env
 /notebooks/token_files
+tools/__pycache__/ai.cpython-313.pyc
+tools/__pycache__/gd_access.cpython-313.pyc
+/tools/__pycache__
