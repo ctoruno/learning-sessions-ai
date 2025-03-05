@@ -1,8 +1,10 @@
 import io
 import os
+import re
 import json
 import tempfile
 import pandas as pd
+from datetime import datetime
 from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
@@ -12,24 +14,24 @@ from googleapiclient.http import MediaFileUpload
 buckets = {
     'recordings'   : {
         'root'     : '1z2nxlaCc6QPY9yIwUMIz_58-2DagVSJc',
-        'abareiro' : '',
-        'cobregon' : '',
-        'lariel'   : '',
-        'lmayans'  : ''
+        'abareiro' : '1eksBTjJjgrJNU2Idokh6aGFoBuKa6G1y',
+        'cobregon' : '13hVca4d_0-5FwgvI5sQuRlOb02TIpH3q',
+        'lariel'   : '1NXR1YTABhoxwpjplks6WP0c1MNcfNwuc',
+        'lmayans'  : '1XYgQPq3ILY3-D-2MrwFQzjuBosqZtSkm'
     },
     'transcripts'  : {
         'root'     : '14c_oSCVHEkSBb59-68qJlJmSu9-WYqfO',
-        'abareiro' : '',
-        'cobregon' : '',
-        'lariel'   : '',
-        'lmayans'  : ''
+        'abareiro' : '1ydTDALaXrq1BnqWZ7dLYGVO29FUrQg9Q',
+        'cobregon' : '1bK9z7e_BNkVh8ltvHesS1q1S5UqL2QHi',
+        'lariel'   : '10DGiC6MCOCtTmWep_2eQr6MhTmFc91qR',
+        'lmayans'  : '1FdY4Y2RjHYJSSjOaOxMg_Mt-49-7YItv'
     },
     'feedback'     : {
         'root'     : '1FKJ5dez8TJAoSIiCtVR6P1rYTrwSE0TT',
-        'abareiro' : '',
-        'cobregon' : '',
-        'lariel'   : '',
-        'lmayans'  : ''
+        'abareiro' : '1fPGe9O5A8tlO-6FlIwrUEFjlpugjkAGI',
+        'cobregon' : '1n4816o7cqQBoR0GcGXVP6R1KxtabORtj',
+        'lariel'   : '1Dg-WQq4ak4pxWqcsM052nPdpvM8t7RgB',
+        'lmayans'  : '1_6mg0LuzomvFpBAEoqtzYCR3RO0MypV3'
     },
     'logs' : '1OGbV6ub6r-G8z7IwBpV9ucPbyOerGYM_',
     'test' : '1gx-_FV5onGEYmT7WDZW0l3Vlmp2nNQeW'
@@ -186,3 +188,34 @@ def upload_file(service, file_name, content, type, parent_id, retid = False):
 
     return f.get('id')
 
+
+def get_available_transcripts(service, parent_id):
+
+    query= f"parents = '{parent_id}'"
+    folder_elements = (
+            service
+            .files()
+            .list(supportsAllDrives=True, includeItemsFromAllDrives=True, q=query)
+            .execute()
+        )
+    
+    file_names = [
+        item['name'] for item in folder_elements['files']
+    ]
+    file_ids = [
+        item['id'] for item in folder_elements['files']
+    ]
+    file_dates = [
+        datetime.strptime(
+            re.search(r"(\d{4}-\d{2}-\d{2})", file_name).group(1), 
+            "%Y-%m-%d"
+        ).date()
+        for file_name in file_names
+    ]
+
+    result = [
+        {"id": file_ids[i], "name": file_names[i], "date": file_dates[i]}
+        for i in range(len(file_names))
+    ]
+
+    return result

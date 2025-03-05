@@ -63,7 +63,7 @@ if missing_keys:
 
     latest_form_reduced = (
         latest_form.copy()
-        .loc[latest_form['KEY'].isin(missing_keys),['username', 'SubmissionDate', 'id_estudiante', 'nombre', 'idioma', 'KEY', 'missing_record']]
+        .loc[latest_form['KEY'].isin(missing_keys),['username', 'SubmissionDate', 'starttime', 'id_estudiante', 'nombre', 'idioma', 'KEY', 'missing_record']]
     )
     st.write(latest_form_reduced)
 

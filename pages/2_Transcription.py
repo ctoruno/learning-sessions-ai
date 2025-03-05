@@ -45,7 +45,7 @@ log_data_raw = gd.download_log(
     available_logs[selected_log], 
     reduce = False
 )
-log_data = log_data_raw[log_data_raw['missing_record']]
+log_data = log_data_raw.loc[(log_data_raw['missing_record']) & (log_data_raw['idioma'] == 'español')]
 st.write(log_data)
 
 st.markdown(
@@ -110,7 +110,7 @@ if process:
             file_name  = audio_name, 
             content    = audio_bytes,
             type       = 'mp3', 
-            parent_id  = gd.buckets['test']    ## CHANGE!!!!!
+            parent_id  = gd.buckets['recordings'][row['username']]
         )
         st.write(f'Grabación cargada a Google Drive')
 
@@ -122,7 +122,7 @@ if process:
             file_name  = transcript_name, 
             content    = transcript,
             type       = 'txt', 
-            parent_id  = gd.buckets['test']    ## CHANGE!!!!!
+            parent_id  = gd.buckets['transcripts'][row['username']]
         )
         st.session_state.trids[f'{row['username']}_{row['id_estudiante']}_{audio_date}'] = x
         st.write(f'Transcripción cargada a Google Drive')

@@ -63,30 +63,26 @@ def gen_system_prompt():
 
     return prompt
 
-def gen_context_prompt(transcript):
+def gen_context_prompt(full_transcript):
     prompt = f'''
-    La siguiente es una transcripción de una sesión de tutoría de matemáticas entre un tutor y un estudiante de cuarto a sexto grado de 
-    primaria:
+    a continuación, tienes una serie de transcripciones de una o varias sesiones de tutoría de matemáticas 
+    entre un tutor y diversos estudiantes de cuarto a sexto grado de primaria:
 
-    [INICIO DE LA TRANSCRIPCIÓN]
+    {full_transcript}
 
-    {transcript}
-
-    [FIN DE LA TRANSCRIPCIÓN]
-
-    La transcripción puede contener errores y omisiones, especialmente en intervenciones cortas. No te enfoques en errores gramaticales o 
+    Las transcripciones puede contener errores y omisiones, especialmente en intervenciones cortas. No te enfoques en errores gramaticales o 
     tipográficos. Además, la transcripción separa las intervenciones por interlocutor, pero no especifica quién es el tutor y quién es el 
     estudiante. Deberás inferirlo según el contenido.
 
     INSTRUCCIONES:
 
-    Con base en la transcripción, evalúa las técnicas de explicación, el compromiso y la eficacia pedagógica del tutor. Luego, elabora un 
+    Con base en la transcripciones, evalúa las técnicas de explicación, el compromiso y la eficacia pedagógica del tutor. Luego, elabora un 
     conjunto estructurado de recomendaciones breves y específicas para mejorar su enseñanza.
 
     Asegúrate de que tu retroalimentación sea:
 
     - Objetiva, alentadora y enfocada en el crecimiento profesional del tutor.
-    - Limitada a 1000 caracteres.
+    - !!!MUY IMPORTANTE: LIMITADA A 1000 CARACTERES!!!.
     - Escrita en formato de lista con viñetas, sin títulos ni encabezados.
     - Directa, clara y utilizando un tono amable, ya que será leída directamente por el tutor.
     - Contextualizada, es decir, procura añadir 1 o 2 ejemplos de cómo el tutor podría haber implementado tus recomendaciones en la sesión previa
