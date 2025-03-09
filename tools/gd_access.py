@@ -33,6 +33,24 @@ buckets = {
         'lariel'   : '1Dg-WQq4ak4pxWqcsM052nPdpvM8t7RgB',
         'lmayans'  : '1_6mg0LuzomvFpBAEoqtzYCR3RO0MypV3'
     },
+    'tutors' : {
+        'abareiro' : {
+            'name' : 'Ana Bareiro',
+            'phone': ['983172719', '981003427']
+        },
+        'cobregon' : {
+            'name' : 'Christian Obregón',
+            'phone': ['595984947525', '595984831886']
+        },
+        'lariel'   : {
+            'name' : 'Lucas Morel',
+            'phone': ['595994253166', '595981724678']
+        },
+        'lmayans'  : {
+            'name' : 'Larissa Mayans',
+            'phone': ['595972611548']
+        }
+    },
     'logs' : '1OGbV6ub6r-G8z7IwBpV9ucPbyOerGYM_',
     'test' : '1gx-_FV5onGEYmT7WDZW0l3Vlmp2nNQeW'
 }
@@ -212,9 +230,12 @@ def get_available_transcripts(service, parent_id):
         ).date()
         for file_name in file_names
     ]
+    student_ids = [
+        re.search(r"PY\d+", item).group(0) for item in file_names
+    ]
 
     result = [
-        {"id": file_ids[i], "name": file_names[i], "date": file_dates[i]}
+        {"id": file_ids[i], "name": file_names[i], "date": file_dates[i], "student_id": student_ids[i]}
         for i in range(len(file_names))
     ]
 

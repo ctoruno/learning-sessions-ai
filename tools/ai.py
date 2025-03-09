@@ -1,6 +1,8 @@
 import tempfile
 import assemblyai as aai
 from openai import OpenAI
+from pydantic import BaseModel, Field
+
 
 def get_transcript(api_key, audio):
 
@@ -28,7 +30,7 @@ def get_transcript(api_key, audio):
     return full_transcript
 
 
-def gen_system_prompt():
+def gen_system_prompt_1():
     prompt = '''
     Eres un experto consultor en educación especializado en tutoría y métodos de enseñanza efectivos. Recibirás transcripciones de sesiones 
     de tutoría en matemáticas entre un tutor y un estudiante de primaria (cuarto a sexto grado). Tu tarea es analizar la metodología de 
@@ -63,9 +65,33 @@ def gen_system_prompt():
 
     return prompt
 
-def gen_context_prompt(full_transcript):
+
+def gen_system_prompt_2():
+    prompt = '''
+    Eres un consultor educativo experto especializado en pedagogía matemática y métodos de tutoría efectivos para educación primaria. 
+    Tu experiencia abarca estrategias de enseñanza diferenciada, identificación de dificultades de aprendizaje y técnicas para 
+    desarrollar competencias matemáticas en estudiantes de 9-12 años.
+
+    Recibirás transcripciones de sesiones de tutoría en matemáticas entre un tutor y varios estudiantes de primaria (cuarto a sexto grado). 
+    Deberás:
+
+    1. Analizar cuidadosamente las interacciones tutor-estudiante en cada transcripción.
+    2. Identificar a los dos estudiantes que muestren mayores dificultades de comprensión matemática.
+    3. Basados en los problemas conceptuales específicos que presentan, así como los patrones de error y confusión recurrentes que identifiques, 
+    deberás proporcionar recomendaciones prácticas y accionables para el tutor para cada uno de estos dos estudiantes.
+
+    Basa tu evaluación en la transcripción proporcionada y en buenas prácticas pedagógicas. Mantén un tono claro, breve y amable, ya que el 
+    tutor leerá directamente las recomendaciones.
+    
+    Tu respuesta debe consistir exclusivamente en un conjunto de recomendaciones derivadas de tu evaluación.
+    '''
+
+    return prompt
+
+
+def gen_context_prompt_1(full_transcript):
     prompt = f'''
-    a continuación, tienes una serie de transcripciones de una o varias sesiones de tutoría de matemáticas 
+    A continuación, tienes una serie de transcripciones de una o varias sesiones de tutoría de matemáticas 
     entre un tutor y diversos estudiantes de cuarto a sexto grado de primaria:
 
     {full_transcript}
@@ -82,7 +108,7 @@ def gen_context_prompt(full_transcript):
     Asegúrate de que tu retroalimentación sea:
 
     - Objetiva, alentadora y enfocada en el crecimiento profesional del tutor.
-    - !!!MUY IMPORTANTE: LIMITADA A 1000 CARACTERES!!!.
+    - LIMITADA A 800 CARACTERES !!!MUY IMPORTANTE!!!.
     - Escrita en formato de lista con viñetas, sin títulos ni encabezados.
     - Directa, clara y utilizando un tono amable, ya que será leída directamente por el tutor.
     - Contextualizada, es decir, procura añadir 1 o 2 ejemplos de cómo el tutor podría haber implementado tus recomendaciones en la sesión previa
@@ -107,24 +133,114 @@ def gen_context_prompt(full_transcript):
     '''
 
     return prompt
+
+
+def gen_context_prompt_2(full_transcript):
+    prompt = f'''
+    A continuación, tienes una serie de transcripciones de una o varias sesiones de tutoría de matemáticas 
+    entre un tutor y diversos estudiantes de cuarto a sexto grado de primaria:
+
+    {full_transcript}
+
+    Las transcripciones puede contener errores y omisiones, especialmente en intervenciones cortas. No te enfoques en errores gramaticales o 
+    tipográficos. Además, la transcripción separa las intervenciones por interlocutor, pero no especifica quién es el tutor y quién es el 
+    estudiante. Deberás inferirlo según el contenido.
+
+    INSTRUCCIONES:
+    Deberás:
+
+    1. Analizar cuidadosamente las interacciones tutor-estudiante en cada transcripción.
+    2. Identificar a los dos estudiantes que muestren mayores dificultades de comprensión matemática
+    3. Diagnosticar los problemas conceptuales específicos que presentan, así como identificar posibles patrones de error o 
+    confusiones recurrentes y determinar sus fortalezas que puedan aprovecharse
+    4. Proporcionar recomendaciones prácticas y accionables para el tutor.
+
+    ASPECTOS A TOMAR EN CUENTA:
+    A la hora de brindar recomendaciones prácticas, por favor considera los siguientes elementos:
+
+    - Estrategias de andamiaje adaptadas a cada estudiante
+    - Actividades concretas para abordar los conceptos problemáticos
+    - Sugerencias para modificar el enfoque comunicativo del tutor
     
-def get_feedback(api_key, transcript):
+    Asegúrate de que tu retroalimentación sea:
+
+    - LIMITADA A 800 CARACTERES POR ESTUDIANTE !!!MUY IMPORTANTE!!!.
+    - Escrita en formato de lista enumerada, sin títulos ni encabezados.
+    - Directa, clara y utilizando un tono amable, ya que será leída directamente por el tutor.
+    - Contextualizada, es decir, procura añadir 1 o 2 ejemplos de cómo el tutor podría haber implementado tus recomendaciones en la sesión previa
+
+    CONSIDERACIONES ADICIONALES:
+
+    - Concéntrate en la forma en que el tutor enseña, no en modificar el contenido de la guía de ejercicios.
+    - Evita resaltar aspectos positivos, salvo para contrastarlos con áreas de mejora.
+    - Recuerda que el estudiante tiene entre 8 y 10 años, por lo que las explicaciones deben ser adecuadas a su nivel.
+    - Las sesiones de tutoría se realizan vía telefónica, por lo que el tutor no puede hacer uso de medios visuales, solo auditivos.
+    - Enfoca tu set de recomendaciones EXCLUSIVAMENTE en los aspectos a mejorar y en las acciones específicas para lograrlo.
+    - Utiliza el identificador del estudiante (ID) para asociar un set de recomendaciones
+    - Menciona el nombre de la estudiante en tu set de recomendaciones si este está presente en la transcripción
+
+    FORMATO DE RESPUESTA:
+    Tu análisis debe presentarse en formato JSON con la siguiente estructura:
+
+    {{
+        "estudiante_1" :  {{
+            "id" : ID del estudiante con mayores dificultades 
+            "feedback" : "Recomendaciones para el estudiante con mayores dificultades como un listado enumerado"
+        }},
+        "estudiante_2" :  {{
+            "id" : ID del segundo estudiante con mayores dificultades 
+            "feedback" : "Recomendaciones para el segundo estudiante con mayores dificultades como un listado enumerado"
+        }},
+    }}
+
+    Donde:
+    - "ID_ESTUDIANTE_1" y "ID_ESTUDIANTE_2" deben ser reemplazados por los identificadores reales de los estudiantes que muestren mayores dificultades según tu análisis.
+    - Cada recomendación debe ser concreta, accionable y específica para ese estudiante particular.
+    - No incluyas explicaciones o análisis adicionales fuera de la estructura JSON.
+
+    Gracias por tu valiosa contribución a la mejora de la calidad educativa.
+    '''
+
+    return prompt
+
+
+class StudentFeedback(BaseModel):
+    id: int = Field(description="ID del estudiante con dificultades")
+    feedback: str = Field(description="Recomendaciones como un listado enumerado")
+
+    
+class Feedback(BaseModel):
+    estudiante_1: StudentFeedback
+    estudiante_2: StudentFeedback
+
+    
+def get_feedback(api_key, transcript, general=True):
 
     client = OpenAI(
         api_key = api_key
     )
 
-    history = [
-        {"role": "system", "content": gen_system_prompt()},
-        {"role": "user",   "content": gen_context_prompt(transcript)}
-    ]
+    if general:
+        history = [
+            {"role": "system", "content": gen_system_prompt_1()},
+            {"role": "user",   "content": gen_context_prompt_1(transcript)}
+        ]
+        chat_completion = client.chat.completions.create(
+            messages = history,
+            model    = "gpt-4o-2024-08-06"
+        )
+        feedback = chat_completion.choices[0].message.content
 
-    chat_completion = client.chat.completions.create(
-        messages = history,
-        model    = "gpt-4o-2024-08-06"
-        # model    = "gpt-4.5-preview-2025-02-27"
-    )
-
-    feedback = chat_completion.choices[0].message.content
+    else:
+        history = [
+            {"role": "system", "content": gen_system_prompt_2()},
+            {"role": "user",   "content": gen_context_prompt_2(transcript)}
+        ]
+        chat_completion = client.beta.chat.completions.parse(
+            messages = history,
+            model    = "gpt-4o-2024-08-06",
+            response_format = Feedback
+        )
+        feedback = chat_completion.choices[0].message.parsed
 
     return feedback

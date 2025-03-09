@@ -7,9 +7,6 @@ from tools import gd_access as gd
 from tools import scto_access as scto
 from tools import ai
 
-if "trids" not in st.session_state:
-    st.session_state.trids = {}
-
 # Instatiating a Google Service to connect with GDrive
 creds = gd.get_gd_info(
     st.secrets['gd_token'],
@@ -80,7 +77,6 @@ if play_sample:
     )
     st.audio(sample_audio_bytes, format='audio/mp3', autoplay=True)
 
-
 if process: 
     st.markdown(
         '<br><h5>INICIANDO PROCESO... Esto puede tardar unos momentos...</h5>',
@@ -89,14 +85,15 @@ if process:
     st.write('----')
 
     n_rows = len(log_data)
-    for i, row in log_data.iterrows():
+    counter = 1
+    for _, row in log_data.iterrows():
 
         audio_url   = row['llamada']
         audio_date  = datetime.strptime(row['SubmissionDate'], "%b %d, %Y %I:%M:%S %p")
         audio_date  = audio_date.strftime("%Y-%m-%d")
         audio_name  = f'{row['username']}_{row['id_estudiante']}_{audio_date}.mp3'
 
-        st.markdown(f'<h5>Processing recording {i+1} of {n_rows}: {audio_name}</h5>', unsafe_allow_html = True)
+        st.markdown(f'<h5>Processing recording {n} of {n_rows}: {audio_name}</h5>', unsafe_allow_html = True)
 
         audio_bytes = scto.get_audio(
             st.secrets['SCTO_server'],
@@ -112,7 +109,7 @@ if process:
             type       = 'mp3', 
             parent_id  = gd.buckets['recordings'][row['username']]
         )
-        st.write(f'Grabación cargada a Google Drive')
+        st.success(f'Grabación cargada a Google Drive')
 
         transcript = ai.get_transcript(api_key = st.secrets['aai_key'], audio = audio_bytes)
         transcript_name = f'tr_{row['username']}_{row['id_estudiante']}_{audio_date}.txt'
@@ -124,8 +121,8 @@ if process:
             type       = 'txt', 
             parent_id  = gd.buckets['transcripts'][row['username']]
         )
-        st.session_state.trids[f'{row['username']}_{row['id_estudiante']}_{audio_date}'] = x
-        st.write(f'Transcripción cargada a Google Drive')
+        st.success(f'Transcripción cargada a Google Drive')
+        counter += 1
 
         st.write('----')
 

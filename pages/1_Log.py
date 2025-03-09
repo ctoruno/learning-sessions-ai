@@ -86,7 +86,7 @@ if missing_keys:
             type       = 'csv', 
             parent_id  = gd.buckets['logs']
         )
-        st.write(f'Data uploaded successfully')
+        st.success(f'Data uploaded successfully')
 
 else:
     st.markdown(

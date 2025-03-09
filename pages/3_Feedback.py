@@ -23,16 +23,15 @@ gd_service = gd.create_service(creds)
 st.markdown(
     '''
     <h3>
-        Paso 3: Procesa la transcripción para recibir un feedback
+        Paso 3: Procesa las transcripciones para recibir un feedback
     </h3>
     <p class='jtext'>
-        El tercer paso es procesar las transcripciones y enviarlas a OpenAI para obtener un set de recomendaciones basado
-        generrdo por IA. No obstante, antes de proceder, <b>asegurate de que las transcripciones fueron procesadas correctamente 
-        en el paso 2</b>.
+        El tercer paso es procesar las transcripciones y enviarlas a OpenAI para obtener un set de recomendaciones generado por 
+        IA. No obstante, antes de proceder, <b>asegurate de que las transcripciones fueron procesadas correctamente en el paso 2</b>.
     </p>
     <p>
         Las transcripciones se mandan en lotes para ser procesadas por GPT. Por lo tanto, debes establecer una ventana de tiempo
-        sobre las transcripciones que quieres mandar a gpt.
+        sobre las transcripciones que quieres mandar a GPT.
     </p>
     ''',
     unsafe_allow_html = True
@@ -44,7 +43,7 @@ with tr_dates:
     with date1:
         start_date = st.date_input(
             'Fecha de inicio de la ventana', 
-            value     = date.today()- timedelta(days=3), 
+            value     = date.today() - timedelta(days=5), 
             min_value = datetime.strptime('2025/02/14', '%Y/%m/%d'), 
             max_value = 'today',
             format    = "YYYY/MM/DD"
@@ -57,16 +56,20 @@ with tr_dates:
             max_value = 'today',
             format    = "YYYY/MM/DD"
         )
-    gpt_submit = st.toggle(
-        'Solo evaluar, sin procesar por GPT',
-        value = True
+    feedback_type = st.selectbox(
+        'Selecciona qué tipo de feedback te gustaría procesar',
+        ['Feedback general', 'Feedback focalizado']
+    )
+    submit2gpt = st.toggle(
+        'Evaluar y mandar directamente a GPT',
+        value = False
     )
     process_tr = st.form_submit_button('Proceder')
 
 if process_tr:
     update_tracking("time_window")
 
-if st.session_state["time_window"]: 
+if st.session_state["time_window"]:
 
     tutors = [
         tutor_name for tutor_name,_ in gd.buckets['transcripts'].items() 
@@ -81,23 +84,24 @@ if st.session_state["time_window"]:
         for file in available_transcripts:
             file["within_window"] = start_date <= file["date"] <= end_date
 
-        transcripts2process_ids = [
-            tr['id'] for tr in available_transcripts
+        transcripts2process = [
+            {
+                'transcript': gd.download_file(gd_service, tr['id']),
+                'student_id': tr['student_id']
+            } 
+            for tr in available_transcripts
             if tr['within_window']
         ]
 
-        transcripts2process = [
-            gd.download_file(gd_service, id) for id in transcripts2process_ids
-        ]
         formatted_transcripts = ' '.join([
             f'''
-            [INICIO DE TRANSCRIPCIÓN {i+1}]
+            [INICIO DE TRANSCRIPCIÓN - ID ESTUDIANTE: {tr['student_id']}]
 
-            {content}
+            {tr['transcript']}
 
-            [FIN DE TRANSCRIPCIÓN {i+1}]
+            [FIN DE TRANSCRIPCIÓN - ID ESTUDIANTE: {tr['student_id']}]
             '''
-            for i,content in enumerate(transcripts2process)
+            for tr in transcripts2process
         ])
 
         st.markdown(
@@ -106,24 +110,61 @@ if st.session_state["time_window"]:
             ''', 
             unsafe_allow_html = True
         )
+        if len(transcripts2process) == 0 :
+            st.warning('No hay transcripciones para evaluar y/o procesar con GPT')
+            continue
 
-        if not gpt_submit: 
-            st.markdown(
-                '<b>Mandando información a GPT... Esto puede tardar unos momentos...</b>',
-                unsafe_allow_html = True
-            )
+        n_chars = len(formatted_transcripts.split())
+        if n_chars < 100000:
+            st.success(f'Número total de tokens es: {n_chars}. Es posible procesar con GPT.')
+        else:
+            st.warning(f'Número total de tokens es: {n_chars}. No será posible procesar con GPT.', icon='🚨')
 
-            feedback = ai.get_feedback(st.secrets['OPENAI_API_KEY'], formatted_transcripts)
-            feed_name  = f'fb_{tutor}_{end_date}.txt'
+        if submit2gpt: 
+            if n_chars < 100000:
 
-            gd.upload_file(
-                service    = gd_service, 
-                file_name  = feed_name, 
-                content    = feedback,
-                type       = 'txt', 
-                # parent_id  = gd.buckets['feedback'][tutor]
-                parent_id  = gd.buckets['test']       # CHANGE!!!!
-            )
-            st.write(f'Retroalimentación cargada a Google Drive')
+                st.markdown(
+                    '<b>Mandando información a GPT... Esto puede tardar unos momentos...</b>',
+                    unsafe_allow_html = True
+                )
+
+                if 'general' in feedback_type:
+                    feedback = ai.get_feedback(
+                        st.secrets['OPENAI_API_KEY'], 
+                        formatted_transcripts, 
+                        general = True
+                    )
+                    feed_name  = f'fb_{tutor}_{date.today()}.txt'
+                    gd.upload_file(
+                        service    = gd_service, 
+                        file_name  = feed_name, 
+                        content    = feedback,
+                        type       = 'txt', 
+                        # parent_id  = gd.buckets['feedback'][tutor]
+                        parent_id  = gd.buckets['test']       # CHANGE!!!!
+                    )
+
+                if 'focalizado' in feedback_type:
+                    feedback = ai.get_feedback(
+                        st.secrets['OPENAI_API_KEY'], 
+                        formatted_transcripts, 
+                        general = False
+                    )
+
+                    for response in feedback:
+                        feed_name  = f'tgfb_{tutor}_{response[0]}_{date.today()}.txt'
+                        gd.upload_file(
+                            service    = gd_service, 
+                            file_name  = feed_name, 
+                            content    = response[1].feedback,
+                            type       = 'txt', 
+                            # parent_id  = gd.buckets['feedback'][tutor]
+                            parent_id  = gd.buckets['test']       # CHANGE!!!!
+                        )
+
+                st.success(f'Retroalimentación cargada a Google Drive')
+
+            else:
+                st.warning(f'Número total de tokens es: {n_chars}. No será posible procesar con GPT.', icon='🚨')
 
         st.write('----')
