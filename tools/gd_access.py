@@ -36,7 +36,7 @@ buckets = {
     'tutors' : {
         'abareiro' : {
             'name' : 'Ana Bareiro',
-            'phone': ['983172719', '981003427']
+            'phone': ['595983172719', '595981003427']
         },
         'cobregon' : {
             'name' : 'Christian Obregón',
@@ -236,6 +236,38 @@ def get_available_transcripts(service, parent_id):
 
     result = [
         {"id": file_ids[i], "name": file_names[i], "date": file_dates[i], "student_id": student_ids[i]}
+        for i in range(len(file_names))
+    ]
+
+    return result
+
+
+def get_available_feedbacks(service, parent_id):
+
+    query= f"parents = '{parent_id}'"
+    folder_elements = (
+            service
+            .files()
+            .list(supportsAllDrives=True, includeItemsFromAllDrives=True, q=query)
+            .execute()
+        )
+    
+    file_names = [
+        item['name'] for item in folder_elements['files']
+    ]
+    file_ids = [
+        item['id'] for item in folder_elements['files']
+    ]
+    file_dates = [
+        datetime.strptime(
+            re.search(r"(\d{4}-\d{2}-\d{2})", file_name).group(1), 
+            "%Y-%m-%d"
+        ).date()
+        for file_name in file_names
+    ]
+
+    result = [
+        {"id": file_ids[i], "name": file_names[i], "date": file_dates[i]}
         for i in range(len(file_names))
     ]
 

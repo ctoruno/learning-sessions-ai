@@ -14,7 +14,7 @@ creds = gd.get_gd_info(
 )
 gd_service = gd.create_service(creds)
 
-# Intro text
+# Initial display and calculations
 st.markdown(
     '''
     <h3>
@@ -78,6 +78,7 @@ if missing_keys:
 
     update = st.button("Actualizar")
 
+    # Updating log record
     if update:
         gd.upload_file(
             service    = gd_service, 

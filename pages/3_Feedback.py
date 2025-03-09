@@ -1,5 +1,4 @@
 import streamlit as st
-import pandas as pd
 from tools import gd_access as gd
 from tools import ai
 from datetime import datetime, date, timedelta
@@ -37,6 +36,7 @@ st.markdown(
     unsafe_allow_html = True
 )
 
+# Input form
 tr_dates = st.form('tr-dates')
 with tr_dates:
     date1, date2 = st.columns(2)
@@ -66,6 +66,7 @@ with tr_dates:
     )
     process_tr = st.form_submit_button('Proceder')
 
+# Processing selected transcripts
 if process_tr:
     update_tracking("time_window")
 

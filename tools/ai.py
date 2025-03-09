@@ -176,25 +176,26 @@ def gen_context_prompt_2(full_transcript):
     - Recuerda que el estudiante tiene entre 8 y 10 años, por lo que las explicaciones deben ser adecuadas a su nivel.
     - Las sesiones de tutoría se realizan vía telefónica, por lo que el tutor no puede hacer uso de medios visuales, solo auditivos.
     - Enfoca tu set de recomendaciones EXCLUSIVAMENTE en los aspectos a mejorar y en las acciones específicas para lograrlo.
-    - Utiliza el identificador del estudiante (ID) para asociar un set de recomendaciones
-    - Menciona el nombre de la estudiante en tu set de recomendaciones si este está presente en la transcripción
+    - Utiliza el identificador del estudiante (ID) para asociar un set de recomendaciones.
+    - !!!MUY IMPORTANTE!!! Menciona el nombre del estudiante en tu set de recomendaciones.
 
     FORMATO DE RESPUESTA:
     Tu análisis debe presentarse en formato JSON con la siguiente estructura:
 
     {{
         "estudiante_1" :  {{
-            "id" : ID del estudiante con mayores dificultades 
+            "id" : ID del estudiante con mayores dificultades,
+            "nombre" : Nombre del estudiante con mayores dificultades,
             "feedback" : "Recomendaciones para el estudiante con mayores dificultades como un listado enumerado"
         }},
         "estudiante_2" :  {{
-            "id" : ID del segundo estudiante con mayores dificultades 
+            "id" : ID del segundo estudiante con mayores dificultades,
+            "nombre" : Nombre del segundo estudiante con mayores dificultades,
             "feedback" : "Recomendaciones para el segundo estudiante con mayores dificultades como un listado enumerado"
         }},
     }}
 
     Donde:
-    - "ID_ESTUDIANTE_1" y "ID_ESTUDIANTE_2" deben ser reemplazados por los identificadores reales de los estudiantes que muestren mayores dificultades según tu análisis.
     - Cada recomendación debe ser concreta, accionable y específica para ese estudiante particular.
     - No incluyas explicaciones o análisis adicionales fuera de la estructura JSON.
 
@@ -205,7 +206,8 @@ def gen_context_prompt_2(full_transcript):
 
 
 class StudentFeedback(BaseModel):
-    id: int = Field(description="ID del estudiante con dificultades")
+    id: str = Field(description="ID del estudiante con dificultades")
+    nombre: str = Field(description="Nombre del estudiante con dificultades")
     feedback: str = Field(description="Recomendaciones como un listado enumerado")
 
     

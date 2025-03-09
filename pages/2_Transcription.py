@@ -16,7 +16,7 @@ creds = gd.get_gd_info(
 )
 gd_service = gd.create_service(creds)
 
-# Intro text
+# Initial display and calculations
 st.markdown(
     '''
     <h3>
@@ -77,6 +77,7 @@ if play_sample:
     )
     st.audio(sample_audio_bytes, format='audio/mp3', autoplay=True)
 
+# Processing audios from selected logs
 if process: 
     st.markdown(
         '<br><h5>INICIANDO PROCESO... Esto puede tardar unos momentos...</h5>',
