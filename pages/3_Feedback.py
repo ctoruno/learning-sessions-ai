@@ -141,8 +141,8 @@ if st.session_state["time_window"]:
                         file_name  = feed_name, 
                         content    = feedback,
                         type       = 'txt', 
-                        # parent_id  = gd.buckets['feedback'][tutor]
-                        parent_id  = gd.buckets['test']       # CHANGE!!!!
+                        parent_id  = gd.buckets['feedback'][tutor]
+                        # parent_id  = gd.buckets['test']       # CHANGE!!!!
                     )
 
                 if 'focalizado' in feedback_type:
@@ -153,14 +153,14 @@ if st.session_state["time_window"]:
                     )
 
                     for response in feedback:
-                        feed_name  = f'tgfb_{tutor}_{response[0]}_{date.today()}.txt'
+                        feed_name  = f'tgfb_{tutor}_{response[1].nombre}_{date.today()}.txt'
                         gd.upload_file(
                             service    = gd_service, 
                             file_name  = feed_name, 
                             content    = response[1].feedback,
                             type       = 'txt', 
-                            # parent_id  = gd.buckets['feedback'][tutor]
-                            parent_id  = gd.buckets['test']       # CHANGE!!!!
+                            parent_id  = gd.buckets['feedback'][tutor]
+                            # parent_id  = gd.buckets['test']       # CHANGE!!!!
                         )
 
                 st.success(f'Retroalimentación cargada a Google Drive')

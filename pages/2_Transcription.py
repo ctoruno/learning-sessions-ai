@@ -94,7 +94,7 @@ if process:
         audio_date  = audio_date.strftime("%Y-%m-%d")
         audio_name  = f'{row['username']}_{row['id_estudiante']}_{audio_date}.mp3'
 
-        st.markdown(f'<h5>Processing recording {n} of {n_rows}: {audio_name}</h5>', unsafe_allow_html = True)
+        st.markdown(f'<h5>Processing recording {counter} of {n_rows}: {audio_name}</h5>', unsafe_allow_html = True)
 
         audio_bytes = scto.get_audio(
             st.secrets['SCTO_server'],

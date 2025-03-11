@@ -46,8 +46,8 @@ feedback_type = st.selectbox(
 
 available_feedbacks = gd.get_available_feedbacks(
     gd_service,
-    # gd.buckets['feedback'][tutor]    # !! CHANGE !!
-    gd.buckets['test']
+    gd.buckets['feedback'][tutor]    
+    # gd.buckets['test']    # !! CHANGE !!
 )
 
 if 'general' in feedback_type:
@@ -113,9 +113,14 @@ with preview_message:
 
 send_fb = st.button('Enviar recomendaciones')
 
+testing = st.toggle('Enviar mensaje de prueba')
+
 if send_fb:
-# phones = gd.buckets['tutors'][tutor]['phone']     # CHANGE!!!!
-    phones = ['17869289137']
+    if testing:
+        phones = ['17869289137', '573192499151']        # CHANGE!!!!
+    else:
+        phones = gd.buckets['tutors'][tutor]['phone']     
+    
     for phone in phones:
         st.markdown(f'<h5>Enviando recomendaciones a {tutor} - Tel: {phone}</h5>', unsafe_allow_html = True)
         wa.send_feedback(
