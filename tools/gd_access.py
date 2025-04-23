@@ -57,6 +57,16 @@ buckets = {
 
 
 def get_gd_info(token, rtoken, cid, csec):
+    """
+    Generates a JSON string with the credentials information.
+    Args:
+        token (str): Access token.
+        rtoken (str): Refresh token.
+        cid (str): Client ID.
+        csec (str): Client secret.
+    Returns:
+        str: JSON string with the credentials information.
+    """
 
     info = {
         "token": token, 
@@ -73,6 +83,13 @@ def get_gd_info(token, rtoken, cid, csec):
 
 
 def create_service(creds):
+    """
+    Creates a Google Drive service instance using the provided credentials.
+    Args:
+        creds (str): JSON string with the credentials information.
+    Returns:
+        service: Google Drive service instance.
+    """
 
     scopes = ['https://www.googleapis.com/auth/drive']
     api_service_name = 'drive', 
@@ -94,11 +111,19 @@ def create_service(creds):
     except Exception as e:
         print(e)
         print(f'Failed to create service instance for {api_service_name}')
-        os.remove(os.path.join(working_dir, token_dir, token_file_name))
+        # os.remove(os.path.join(working_dir, token_dir, token_file_name))
         return None
 
 
 def get_available_logs(service, logs_id = buckets['logs']):
+    """
+    Retrieves a list of available logs from a specified Google Drive folder.
+    Args:
+        service: Google Drive service instance.
+        logs_id (str): ID of the Google Drive folder containing the logs.
+    Returns:
+        dict: Dictionary containing the names and IDs of the available logs.
+    """
 
     query= f"parents = '{logs_id}'"
     folder_elements = (
@@ -119,6 +144,15 @@ def get_available_logs(service, logs_id = buckets['logs']):
 
 
 def download_log(service, file_id, reduce=True):
+    """
+    Downloads a log file from Google Drive and returns it as a pandas DataFrame.
+    Args:
+        service: Google Drive service instance.
+        file_id (str): ID of the log file to download.
+        reduce (bool): Whether to reduce the DataFrame to specific columns.
+    Returns:
+        pd.DataFrame: DataFrame containing the log data.
+    """
 
     try:
         request = (
@@ -144,7 +178,16 @@ def download_log(service, file_id, reduce=True):
 
     return df
 
+
 def download_file(service, file_id):
+    """
+    Downloads a file from Google Drive and returns its content as a string.
+    Args:
+        service: Google Drive service instance.
+        file_id (str): ID of the file to download.
+    Returns:
+        str: Content of the downloaded file.
+    """
 
     try:
         request = (
@@ -170,6 +213,17 @@ def download_file(service, file_id):
 
 
 def upload_file(service, file_name, content, type, parent_id, retid = False):
+    """
+    Uploads a file to Google Drive.
+    Args:
+        service: Google Drive service instance.
+        file_name (str): Name of the file to upload.
+        content (str): Content of the file to upload.
+        type (str): Type of the file (e.g., 'csv', 'txt', 'mp3').
+        parent_id (str): ID of the parent folder in Google Drive.
+        retid (bool): Whether to return the file ID after upload.
+    Returns:
+        str: ID of the uploaded file if retid is True, otherwise None."""
 
     if type == 'csv':
         mtype = 'text/csv'
@@ -208,6 +262,14 @@ def upload_file(service, file_name, content, type, parent_id, retid = False):
 
 
 def get_available_transcripts(service, parent_id):
+    """
+    Retrieves a list of available transcripts from a specified Google Drive folder.
+    Args:
+        service: Google Drive service instance.
+        parent_id (str): ID of the Google Drive folder containing the transcripts.
+    Returns:
+        list: List of dictionaries containing the names, IDs, dates, and student IDs of the available transcripts.
+    """
 
     query= f"parents = '{parent_id}'"
     folder_elements = (
@@ -243,6 +305,14 @@ def get_available_transcripts(service, parent_id):
 
 
 def get_available_feedbacks(service, parent_id):
+    """
+    Retrieves a list of available feedback files from a specified Google Drive folder.
+    Args:
+        service: Google Drive service instance.
+        parent_id (str): ID of the Google Drive folder containing the feedback files.
+    Returns:
+        list: List of dictionaries containing the names, IDs, and dates of the available feedback files.
+    """
 
     query= f"parents = '{parent_id}'"
     folder_elements = (

@@ -3,6 +3,15 @@ from io import StringIO
 from pysurveycto import SurveyCTOObject
 
 def get_latest_data(server, user, key):
+    """
+    Get the latest data from SurveyCTO.
+    Args:
+        server (str): The server name.
+        user (str): The username.
+        key (str): The password.
+    Returns:
+        pd.DataFrame: The latest data from SurveyCTO.
+    """
 
     scto = SurveyCTOObject(
         server_name = server, 
@@ -18,7 +27,18 @@ def get_latest_data(server, user, key):
 
     return SCTO_data
 
+
 def get_audio(server, user, key, url):
+    """
+    Get the audio file from SurveyCTO.
+    Args:
+        server (str): The server name.
+        user (str): The username.
+        key (str): The password.
+        url (str): The URL of the audio file.
+    Returns:
+        bytes: The audio file.
+    """
 
     s = SurveyCTOObject(
         server_name = server, 
